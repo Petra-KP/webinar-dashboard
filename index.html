@@ -67,12 +67,9 @@
             </section>
 
             <section id="tab-katalog" class="tab-content active">
-                <div class="section-header" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
-                    <div>
-                        <h2>Katalog témat ze Superpower metodiky</h2>
-                        <p class="section-desc">Témata podle superschopností. Ty klikneš „Schválit“ pro přidání do Moje návrhy. Kolegové hlasují přímo na kartě – Chci nebo Nechci (jméno + volitelná poznámka).</p>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="clearAllVotes()" title="Smazat všechny hlasy u všech témat">🗑️ Smazat všechny hlasy</button>
+                <div class="section-header">
+                    <h2>Katalog témat ze Superpower metodiky</h2>
+                    <p class="section-desc">Témata podle superschopností. Klikni „Schválit“ pro přidání do Moje návrhy.</p>
                 </div>
                 <div class="filters">
                     <button class="filter-btn active" data-katalog-filter="all">Všechna</button>
@@ -204,32 +201,6 @@
             </div>
         </div>
 
-        <!-- Vote modal – jméno + poznámka před odesláním hlasu -->
-        <div id="vote-modal" class="modal" style="display: none;">
-            <div class="modal-backdrop"></div>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="vote-modal-title">Váš hlas</h2>
-                    <button class="modal-close" onclick="closeVoteModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p id="vote-modal-topic" class="vote-modal-topic" style="margin-bottom:16px;font-weight:500;color:var(--gray-700)"></p>
-                    <p id="vote-modal-preference" class="vote-modal-preference" style="margin-bottom:16px;padding:8px 12px;border-radius:8px;font-size:0.9rem"></p>
-                    <div class="field-group" style="margin-bottom:16px">
-                        <label for="vote-name">Vaše jméno <span style="color:var(--aibility-primary)">*</span></label>
-                        <input type="text" id="vote-name" placeholder="např. Jana Nováková" maxlength="80" required>
-                    </div>
-                    <div class="field-group">
-                        <label for="vote-note">Poznámka (volitelně)</label>
-                        <textarea id="vote-note" rows="3" placeholder="Např. zajímá mě hlavně část o automatizaci..." maxlength="500"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="closeVoteModal()">Zrušit</button>
-                    <button class="btn btn-primary" id="vote-submit-btn">Odeslat hlas</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="embedded_data.js"></script>

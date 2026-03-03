@@ -6,22 +6,17 @@
 
 const API_URL = 'http://localhost:5000/api';
 const STORAGE_KEY = 'webinar_drafts';
-const VOTES_STORAGE_KEY = 'webinar_votes';
 
 let drafts = [];
 let slots = [];
 let lektori = [];
 let spKatalog = [];
-let colleaguePreferences = { merged: [], error: null };
 let currentDraftId = null;
 let useApi = false;
-
-let pendingVote = null; // { topicId, topicName, preference }
 
 document.addEventListener('DOMContentLoaded', async () => {
     initTabs();
     initFilters();
-    initVoteModal();
     useApi = await checkApiAvailable();
     if (!useApi && (location.protocol === 'file:' || location.href.startsWith('file://'))) {
         const banner = document.createElement('div');
@@ -30,61 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.body.insertBefore(banner, document.body.firstChild);
     }
     loadData();
-    // Pro kolegy: ?vote=1 nebo #hlasovani → otevři Katalog SP (hlasování je přímo u témat)
-    const params = new URLSearchParams(location.search);
-    if (params.get('vote') === '1' || location.hash === '#hlasovani') {
-        document.querySelector('[data-tab="katalog"]')?.click();
-    }
 });
-
-function initVoteModal() {
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.btn-vote');
-        if (btn) {
-            const topicId = btn.dataset.topicId;
-            const topicName = btn.dataset.topicName || '';
-            const preference = btn.dataset.preference || 'chci';
-            openVoteModal(topicId, topicName, preference);
-        }
-    });
-    document.getElementById('vote-submit-btn')?.addEventListener('click', confirmVote);
-    document.getElementById('vote-modal')?.querySelector('.modal-backdrop')?.addEventListener('click', closeVoteModal);
-    document.getElementById('vote-name')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); confirmVote(); } });
-    document.getElementById('vote-note')?.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); confirmVote(); } });
-}
-
-function openVoteModal(topicId, topicName, preference) {
-    pendingVote = { topicId, topicName, preference };
-    const prefLabels = { chci: '✓ Chci', zvažuji: '~ Zvažuji', nechci: '✗ Nechci' };
-    const prefClass = { chci: 'preference-chci', zvažuji: 'preference-zvazuji', nechci: 'preference-nechci' };
-    document.getElementById('vote-modal-title').textContent = 'Váš hlas';
-    document.getElementById('vote-modal-topic').textContent = topicName || topicId;
-    const prefEl = document.getElementById('vote-modal-preference');
-    prefEl.textContent = prefLabels[preference] || preference;
-    prefEl.className = 'vote-modal-preference ' + (prefClass[preference] || '');
-    document.getElementById('vote-name').value = '';
-    document.getElementById('vote-note').value = '';
-    document.getElementById('vote-modal').style.display = 'flex';
-    document.getElementById('vote-name').focus();
-}
-
-function closeVoteModal() {
-    pendingVote = null;
-    document.getElementById('vote-modal').style.display = 'none';
-}
-
-function confirmVote() {
-    const name = (document.getElementById('vote-name')?.value || '').trim();
-    const note = (document.getElementById('vote-note')?.value || '').trim();
-    if (!name) {
-        showToast('Prosím zadejte své jméno');
-        document.getElementById('vote-name').focus();
-        return;
-    }
-    if (!pendingVote) return;
-    submitVote(pendingVote.topicId, pendingVote.preference, name, note);
-    closeVoteModal();
-}
 
 // === Tabs ===
 function initTabs() {
@@ -183,7 +124,7 @@ function calcSlotsStandalone(count = 12) {
 
 // === Data Loading ===
 async function loadData() {
-    await Promise.all([loadDrafts(), loadSlots(), loadLektori(), loadSPKatalog(), loadColleaguePreferences(), checkAirtableStatus()]);
+    await Promise.all([loadDrafts(), loadSlots(), loadLektori(), loadSPKatalog(), checkAirtableStatus()]);
 }
 
 async function loadDrafts() {
@@ -238,175 +179,6 @@ async function loadLektori() {
     }
 }
 
-const DEFAULT_PREFERENCES = (window.PREFERENCES || {}).preferences || [];
-
-async function loadColleaguePreferences() {
-    if (useApi) {
-        try {
-            const resp = await fetch(`${API_URL}/colleague-preferences`);
-            const data = await resp.json();
-            colleaguePreferences = data;
-        } catch (err) {
-            colleaguePreferences = { merged: [], error: 'Chyba načtení' };
-        }
-    } else if (getJsonBinConfig()) {
-        try {
-            const data = await fetchJsonBin();
-            const prefs = data.preferences || [];
-            const merged = ensureAllTopics(prefs);
-            colleaguePreferences = { merged, error: null };
-        } catch (err) {
-            console.error('JSONBin:', err);
-            colleaguePreferences = { merged: ensureAllTopics([]), error: 'Chyba načtení z JSONBin' };
-        }
-    } else {
-        const prefs = window.PREFERENCES || { preferences: [] };
-        let merged = (prefs.preferences || []).map(p => ({
-            topic_id: p.topic_id,
-            topic_name: p.topic_name,
-            modul: p.modul,
-            votes: [...(p.votes || [])]
-        }));
-        merged = ensureAllTopics(merged);
-        try {
-            const localVotes = JSON.parse(localStorage.getItem(VOTES_STORAGE_KEY) || '{}');
-            for (const m of merged) {
-                const lv = localVotes[m.topic_id] || [];
-                m.votes = [...m.votes, ...lv];
-            }
-        } catch {}
-        // Přidat vlastní návrhy (drafts) do Hlasování
-        const spIds = new Set((DEFAULT_PREFERENCES.length ? DEFAULT_PREFERENCES : merged).map(p => p.topic_id));
-        const customDrafts = drafts.filter(d =>
-            (d.status === 'draft' || d.status === 'rejected') &&
-            !(d.archiv_status || '') &&
-            (!d.topic_id || String(d.topic_id).startsWith('draft-')) &&
-            !spIds.has(d.topic_id || '')
-        );
-        for (const d of customDrafts) {
-            const tid = d.topic_id || d.theme_id || `draft-${d.id}`;
-            if (!merged.some(m => m.topic_id === tid)) {
-                const lv = (() => { try { return JSON.parse(localStorage.getItem(VOTES_STORAGE_KEY) || '{}')[tid] || []; } catch { return []; } })();
-                merged.push({
-                    topic_id: tid,
-                    topic_name: d.tema || 'Vlastní návrh',
-                    modul: d.modul || 'Chat',
-                    votes: [...lv],
-                    is_custom: true,
-                    draft_id: d.id
-                });
-            }
-        }
-        colleaguePreferences = { merged, error: null };
-    }
-    renderKatalog(); // Aktualizovat hlasy v Katalogu SP
-}
-
-function getJsonBinConfig() {
-    const c = window.JSONBIN_CONFIG || {};
-    return (c.binId && c.apiKey) ? c : null;
-}
-
-function ensureAllTopics(prefs) {
-    const byId = {};
-    for (const p of prefs) if (p.topic_id) byId[p.topic_id] = p;
-    // Katalog SP je zdroj pravdy – stejná témata jako v záložce Katalog
-    const katalog = window.SP_KATALOG || [];
-    const base = katalog.length ? katalog.map(t => ({
-        topic_id: t.id || t.topic_id || '',
-        topic_name: t.tema || t.topic_name || '',
-        modul: t.modul || 'Chat',
-        votes: []
-    })).filter(t => t.topic_id) : (DEFAULT_PREFERENCES.length ? DEFAULT_PREFERENCES : []);
-    return base.map(p => ({
-        topic_id: p.topic_id,
-        topic_name: (byId[p.topic_id] || p).topic_name || p.topic_name,
-        modul: (byId[p.topic_id] || p).modul || p.modul,
-        votes: [...((byId[p.topic_id] || p).votes || [])]
-    }));
-}
-
-async function fetchJsonBin() {
-    const c = getJsonBinConfig();
-    if (!c) throw new Error('JSONBin není nakonfigurován');
-    const resp = await fetch(`https://api.jsonbin.io/v3/b/${c.binId}/latest`, {
-        headers: { 'X-Master-Key': c.apiKey }
-    });
-    if (!resp.ok) throw new Error('JSONBin: ' + (await resp.text()));
-    const json = await resp.json();
-    const data = json.record || json;
-    if (!data || typeof data !== 'object') return { preferences: [] };
-    if (!Array.isArray(data.preferences)) return { preferences: ensureAllTopics([]) };
-    return data;
-}
-
-async function updateJsonBin(data) {
-    const c = getJsonBinConfig();
-    if (!c) throw new Error('JSONBin není nakonfigurován');
-    const resp = await fetch(`https://api.jsonbin.io/v3/b/${c.binId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'X-Master-Key': c.apiKey },
-        body: JSON.stringify(data)
-    });
-    if (!resp.ok) throw new Error('JSONBin: ' + (await resp.text()));
-}
-
-function renderColleaguePreferences(filter = 'all') {
-    const container = document.getElementById('preferences-list');
-    const emptyState = document.getElementById('preferences-empty');
-    if (!container) return;
-
-    let merged = colleaguePreferences.merged || [];
-    if (filter !== 'all') merged = merged.filter(m => m.modul === filter);
-    const err = colleaguePreferences.error;
-
-    if (merged.length === 0) {
-        container.innerHTML = '';
-        emptyState.style.display = 'block';
-        emptyState.querySelector('h3').textContent = err ? 'Chyba načtení' : 'Žádné preference';
-        emptyState.querySelector('p').textContent = err || 'Kolegové mohou hlasovat přes odkaz nebo upravit data/webinar_preferences.json v Cursoru.';
-        return;
-    }
-
-    emptyState.style.display = 'none';
-    container.innerHTML = merged.map(item => {
-        const votes = item.votes || [];
-        const chci = votes.filter(v => v.preference === 'chci').length;
-        const zvažuji = votes.filter(v => v.preference === 'zvažuji').length;
-        const nechci = votes.filter(v => v.preference === 'nechci').length;
-        const mc = (item.modul || '').toLowerCase();
-        const mi = item.modul === 'Build' ? '🛠️' : '💬';
-        const votesHtml = votes.map(v => `
-            <div class="preference-vote preference-${v.preference}">
-                <span class="vote-person">${esc(v.person)}</span>
-                <span class="vote-pref">${v.preference === 'chci' ? '✓ Chci' : v.preference === 'zvažuji' ? '~ Zvažuji' : '✗ Nechci'}</span>
-                ${v.comment ? `<div class="vote-comment">${esc(v.comment).substring(0, 150)}${v.comment.length > 150 ? '…' : ''}</div>` : ''}
-            </div>
-        `).join('');
-        return `
-            <div class="card card-preferences">
-                <div class="card-header">
-                    <span class="card-module ${mc}">${mi} ${item.modul || '—'}</span>
-                    ${item.is_custom ? '<span style="font-size:0.7rem;background:var(--accent-build-light);color:var(--accent-build);padding:2px 8px;border-radius:6px">Vlastní návrh</span>' : ''}
-                    <span class="preference-counts">
-                        <span class="count-chci">${chci}✓</span>
-                        <span class="count-zvazuji">${zvažuji}~</span>
-                        <span class="count-nechci">${nechci}✗</span>
-                    </span>
-                </div>
-                <h3 class="card-title">${esc(item.topic_name)}</h3>
-                <div class="card-actions card-actions-hlasovani">
-                    <button type="button" class="btn btn-success btn-sm btn-vote" data-topic-id="${esc(item.topic_id)}" data-topic-name="${esc(item.topic_name)}" data-preference="chci">✓ Chci</button>
-                    <button type="button" class="btn btn-warning btn-sm btn-vote" data-topic-id="${esc(item.topic_id)}" data-topic-name="${esc(item.topic_name)}" data-preference="zvažuji">~ Zvažuji</button>
-                    <button type="button" class="btn btn-secondary btn-sm btn-vote" data-topic-id="${esc(item.topic_id)}" data-topic-name="${esc(item.topic_name)}" data-preference="nechci">✗ Nechci</button>
-                    ${votes.length ? `<button type="button" class="btn btn-danger btn-sm" onclick="clearVotes('${esc(item.topic_id)}')" title="Smazat všechny hlasy u tohoto tématu">🗑️ Smazat hlasy</button>` : ''}
-                </div>
-                ${votesHtml ? `<div class="preference-votes" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-200)">${votesHtml}</div>` : ''}
-            </div>
-        `;
-    }).join('');
-}
-
 async function loadSPKatalog() {
     if (useApi) {
         try {
@@ -432,14 +204,8 @@ async function loadSPKatalog() {
 async function checkAirtableStatus() {
     const el = document.getElementById('airtable-status');
     if (!useApi) {
-        const hasJsonBin = !!getJsonBinConfig();
-        if (hasJsonBin) {
-            el.className = 'status-badge status-connected';
-            el.innerHTML = '🟢 Hlasy sdílené';
-        } else {
-            el.className = 'status-badge status-disconnected';
-            el.innerHTML = '📂 Hlasy jen v prohlížeči';
-        }
+        el.className = 'status-badge status-disconnected';
+        el.innerHTML = '📂 Lokální režim';
         return;
     }
     try {
@@ -659,12 +425,6 @@ function renderKatalogCard(topic, index) {
     const obsah = topic.obsah || [];
     const obsahClean = obsah.filter(o => o && !o.startsWith('**')).slice(0, 3);
     const lektor = topic.navrh_lektora || '';
-    const topicId = topic.id || topic.topic_id || '';
-    const prefItem = (colleaguePreferences.merged || []).find(m => m.topic_id === topicId);
-    const votes = prefItem?.votes || [];
-
-    const votesChci = votes.filter(v => v.preference === 'chci');
-    const votesNechci = votes.filter(v => v.preference === 'nechci');
 
     return `
         <div class="card card-katalog" data-katalog-index="${index}" onclick="if (!event.target.closest('.card-actions')) openKatalogDetail(${index})">
@@ -677,29 +437,8 @@ function renderKatalogCard(topic, index) {
             <div class="card-meta">
                 ${lektor ? `<span class="card-meta-item">🎓 ${esc(lektor)}</span>` : ''}
             </div>
-            ${votes.length > 0 ? `
-            <div class="card-votes" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-200);font-size:0.85rem">
-                <strong style="color:var(--gray-600)">👥 Hlasy:</strong>
-                <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px">
-                    ${votes.map(v => {
-                        const lbl = v.preference === 'chci' ? '✓ Chci' : (v.preference === 'zvažuji' ? '~ Zvažuji' : '✗ Nechci');
-                        const cls = v.preference === 'chci' ? 'preference-chci' : (v.preference === 'zvažuji' ? 'preference-zvazuji' : 'preference-nechci');
-                        return `<div><strong>${esc(v.person || '')}</strong> <span class="${cls}">${lbl}</span>${v.comment ? ` – ${esc(v.comment)}` : ''}</div>`;
-                    }).join('')}
-                </div>
-            </div>
-            ` : ''}
-            <div class="card-actions" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+            <div class="card-actions" style="margin-top:12px">
                 <button class="btn btn-primary btn-sm" onclick="useTopicFromSPByIndex(${index});event.stopPropagation()">✓ Schválit</button>
-                <div style="display:flex;flex-direction:column;gap:4px">
-                    <span style="font-size:0.75rem;color:var(--gray-600);font-weight:600">Hlasovat:</span>
-                    <div style="display:flex;gap:6px;flex-wrap:wrap">
-                        <button class="btn btn-success btn-sm btn-vote" data-topic-id="${esc(topicId)}" data-topic-name="${esc(topic.tema)}" data-preference="chci">✓ Chci</button>
-                        <button class="btn btn-secondary btn-sm btn-vote" data-topic-id="${esc(topicId)}" data-topic-name="${esc(topic.tema)}" data-preference="nechci">✗ Nechci</button>
-                        ${votes.length ? `<span class="preference-counts" style="font-size:0.75rem;color:var(--gray-600);align-self:center">✓${votesChci.length} ✗${votesNechci.length}</span>` : ''}
-                        ${votes.length ? `<button type="button" class="btn btn-danger btn-sm" onclick="clearVotes('${esc(topicId)}');event.stopPropagation()" title="Smazat hlasy">🗑️</button>` : ''}
-                    </div>
-                </div>
             </div>
         </div>
     `;
@@ -773,29 +512,10 @@ function openKatalogDetail(index) {
         </div>` : ''}
     `;
 
-    const topicId = topic.id || topic.topic_id || '';
-    const prefItem = (colleaguePreferences.merged || []).find(m => m.topic_id === topicId);
-    const votes = prefItem?.votes || [];
-    if (votes.length > 0) {
-        const votesHtml = votes.map(v => {
-            const pClass = v.preference === 'chci' ? 'preference-chci' : (v.preference === 'zvažuji' ? 'preference-zvazuji' : 'preference-nechci');
-            const pLabel = v.preference === 'chci' ? '✓ Chci' : (v.preference === 'zvažuji' ? '~ Zvažuji' : '✗ Nechci');
-            return `<div class="preference-vote-item" style="margin-bottom:8px;padding:8px;background:var(--gray-50);border-radius:6px"><strong>${esc(v.person || '')}</strong> <span class="${pClass}">${pLabel}</span>${v.comment ? `<br><small style="color:var(--gray-600)">${esc(v.comment)}</small>` : ''}</div>`;
-        }).join('');
-        html += `<div class="detail-section" style="margin-bottom:20px"><h4>👥 Hlasy kolegů</h4>${votesHtml}</div>`;
-    }
-
     document.getElementById('modal-title').textContent = topic.tema;
     document.getElementById('modal-body').innerHTML = html;
     document.getElementById('modal-footer').innerHTML = `
         <button class="btn btn-secondary" onclick="closeModal()">Zavřít</button>
-        <div style="display:flex;flex-direction:column;gap:4px">
-            <span style="font-size:0.75rem;color:var(--gray-600);font-weight:600">Hlasovat:</span>
-            <div style="display:flex;gap:6px">
-                <button class="btn btn-success btn-sm btn-vote" data-topic-id="${esc(topicId)}" data-topic-name="${esc(topic.tema)}" data-preference="chci">✓ Chci</button>
-                <button class="btn btn-secondary btn-sm btn-vote" data-topic-id="${esc(topicId)}" data-topic-name="${esc(topic.tema)}" data-preference="nechci">✗ Nechci</button>
-            </div>
-        </div>
         <button class="btn btn-primary" onclick="useTopicFromSPByIndex(${index});closeModal();showToast('Přidáno do Moje návrhy')">✓ Schválit</button>
     `;
     document.getElementById('draft-modal').style.display = 'flex';
@@ -1036,7 +756,6 @@ async function submitAddTopic() {
                 showToast('Návrh přidán ✅');
                 closeAddTopicModal();
                 await loadDrafts();
-                await loadColleaguePreferences();
                 updateCounts();
                 document.querySelector('[data-tab="drafts"]')?.click();
             } else {
@@ -1070,7 +789,6 @@ async function submitAddTopic() {
         showToast('Návrh přidán ✅');
         closeAddTopicModal();
         loadDrafts();
-        loadColleaguePreferences();
         updateCounts();
         document.querySelector('[data-tab="drafts"]')?.click();
     } catch (e) {
@@ -1193,7 +911,6 @@ async function openDraftDetail(id) {
     const draft = drafts.find(d => d.id === id);
     if (!draft) return;
     currentDraftId = id;
-    await loadColleaguePreferences();
 
     document.getElementById('modal-title').textContent = draft.tema;
 
@@ -1334,7 +1051,6 @@ async function openDraftDetail(id) {
 
 // === Text Editor Modal ===
 async function openTextEditor(id) {
-    await loadColleaguePreferences();
     const draft = drafts.find(d => d.id === id);
     if (!draft || !draft.texts) {
         showToast('Nejsou texty k úpravě');
@@ -1617,28 +1333,8 @@ function renderSuperpowersWithColors(supArr) {
 }
 
 /** Najde vysvětlení superschopnosti ze Slovníčku (metodika SP) */
-/** Vrátí HTML sekci s hlasy kolegů pro draft (když má topic_id a existují hlasy). */
 function renderDraftVotesSection(draft) {
-    const topicId = draft.topic_id || draft.theme_id || '';
-    if (!topicId) return '';
-    const item = (colleaguePreferences.merged || []).find(m => m.topic_id === topicId);
-    const votes = (item && item.votes) || [];
-    if (votes.length === 0) return '';
-    const items = votes.map(v => {
-        const pref = v.preference === 'chci' ? '✓ Chci' : v.preference === 'zvažuji' ? '~ Zvažuji' : '✗ Nechci';
-        const cls = v.preference === 'chci' ? 'preference-chci' : v.preference === 'zvažuji' ? 'preference-zvazuji' : 'preference-nechci';
-        return `<div class="preference-vote ${cls}" style="margin-bottom:8px;padding:8px 12px;border-radius:8px;background:var(--gray-50)">
-            <strong>${esc(v.person || 'Kolega')}</strong> – ${pref}
-            ${v.comment ? `<div style="margin-top:4px;font-size:0.85rem;color:var(--gray-600)">${esc(v.comment)}</div>` : ''}
-        </div>`;
-    }).join('');
-    return `
-        <div class="detail-section" style="margin-bottom:20px;background:var(--accent-chat-light);padding:16px;border-radius:8px;border-left:4px solid var(--accent-chat)">
-            <h4>👥 Hlasy kolegů</h4>
-            <p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:12px">Zpětná vazba od kolegů k tomuto tématu – propsáno z Hlasování.</p>
-            <div>${items}</div>
-        </div>
-    `;
+    return '';
 }
 
 function getSlovnickeDesc(superschopnost) {
@@ -1654,104 +1350,6 @@ function getSlovnickeDesc(superschopnost) {
 
 function persistDrafts() {
     if (!useApi) localStorage.setItem(STORAGE_KEY, JSON.stringify(drafts));
-}
-
-/** Smaže všechny hlasy u daného tématu. */
-async function clearVotes(topicId) {
-    if (!confirm('Opravdu smazat všechny hlasy u tohoto tématu? Tato akce je nevratná.')) return;
-    if (!useApi) {
-        showToast('Pro mazání hlasů spusť API server (Spustit_dashboard.bat)');
-        return;
-    }
-    try {
-        const resp = await fetch(`${API_URL}/votes/${encodeURIComponent(topicId)}/clear`, { method: 'DELETE' });
-        if (resp.ok) {
-            showToast('Hlasy smazány');
-            loadColleaguePreferences();
-        } else {
-            const d = await resp.json();
-            showToast(d.error || 'Chyba při mazání');
-        }
-    } catch (e) {
-        showToast('Chyba spojení – spusť API server');
-    }
-}
-
-/** Smaže všechny hlasy u všech témat. Standalone: localStorage. S API: volá endpoint. */
-async function clearAllVotes() {
-    if (!confirm('Opravdu smazat všechny hlasy u všech témat? Tato akce je nevratná.')) return;
-    if (useApi) {
-        try {
-            const resp = await fetch(`${API_URL}/votes/clear-all`, { method: 'DELETE' });
-            if (resp.ok) {
-                showToast('Všechny hlasy smazány');
-                loadColleaguePreferences();
-            } else {
-                const d = await resp.json();
-                showToast(d.error || 'Chyba při mazání');
-            }
-        } catch (e) {
-            showToast('Chyba spojení – spusť API server (Spustit_dashboard.bat)');
-        }
-        return;
-    }
-    localStorage.removeItem(VOTES_STORAGE_KEY);
-    showToast('Všechny hlasy smazány (v tomto prohlížeči)');
-    loadColleaguePreferences();
-}
-
-/** Uloží hlas – přes API, JSONBin nebo do localStorage. Person a comment z modalu. */
-async function submitVote(topicId, preference, person, comment) {
-    const p = (person || '').trim() || 'Kolega';
-    const c = (comment || '').trim() || '';
-    if (useApi) {
-        try {
-            const resp = await fetch(`${API_URL}/vote`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic_id: topicId, preference, person: p, comment: c })
-            });
-            if (resp.ok) {
-                showToast(`Hlas uložen: ${preference === 'chci' ? '✓ Chci' : preference === 'zvažuji' ? '~ Zvažuji' : '✗ Nechci'}`);
-                loadColleaguePreferences();
-            } else {
-                const d = await resp.json();
-                showToast(d.error || 'Chyba');
-            }
-        } catch (e) {
-            showToast('Chyba spojení – spusť API server (Spustit_dashboard.bat)');
-        }
-        return;
-    }
-    if (getJsonBinConfig()) {
-        try {
-            const data = await fetchJsonBin();
-            const prefs = ensureAllTopics(data.preferences || []);
-            const topic = prefs.find(t => t.topic_id === topicId);
-            if (topic) {
-                topic.votes = topic.votes || [];
-                topic.votes.push({ person: p, preference, comment: c });
-                await updateJsonBin({ last_updated: new Date().toISOString().slice(0, 10), preferences: prefs });
-                showToast(`Hlas uložen: ${preference === 'chci' ? '✓ Chci' : preference === 'zvažuji' ? '~ Zvažuji' : '✗ Nechci'}`);
-                loadColleaguePreferences();
-            } else {
-                showToast('Téma nenalezeno');
-            }
-        } catch (e) {
-            console.error(e);
-            showToast('Chyba ukládání do JSONBin – zkontroluj config.js');
-        }
-        return;
-    }
-    let votes = {};
-    try {
-        votes = JSON.parse(localStorage.getItem(VOTES_STORAGE_KEY) || '{}');
-    } catch {}
-    if (!votes[topicId]) votes[topicId] = [];
-    votes[topicId].push({ person: p, preference, comment: c });
-    localStorage.setItem(VOTES_STORAGE_KEY, JSON.stringify(votes));
-    showToast('Hlas uložen (v tomto prohlížeči). Pro sdílení nastav JSONBin v config.js.');
-    loadColleaguePreferences();
 }
 
 function showToast(message) {
