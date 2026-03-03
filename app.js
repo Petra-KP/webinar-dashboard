@@ -452,6 +452,41 @@ function useTopicFromSPByIndex(index) {
     if (topic) useTopicFromSP(topic);
 }
 
+function downloadTopicsAsMd() {
+    const filtered = spKatalog.filter(t => t.modul === 'Chat' || t.modul === 'Build');
+    const filter = document.querySelector('.filter-btn[data-katalog-filter].active')?.dataset?.katalogFilter || 'all';
+    const topics = filter === 'all' ? filtered : filtered.filter(t => t.modul === filter);
+    if (topics.length === 0) {
+        showToast('Žádná témata ke stažení');
+        return;
+    }
+    const lines = ['# Katalog témat ze Superpower metodiky\n', `*Export: ${new Date().toLocaleDateString('cs-CZ')} – ${topics.length} témat*\n`];
+    for (const t of topics) {
+        lines.push(`## ${t.tema || ''}`);
+        lines.push(`\n**Modul:** ${t.modul || ''} | **ID:** ${t.id || ''}\n`);
+        if (t.problem) lines.push(`### Problém\n\n${t.problem}\n`);
+        if (t.reseni) lines.push(`### Řešení\n\n${t.reseni}\n`);
+        if (t.superschopnosti && t.superschopnosti.length) {
+            lines.push(`### Superschopnosti\n\n${t.superschopnosti.map(s => `- ${s}`).join('\n')}\n`);
+        }
+        if (t.obsah && t.obsah.length) {
+            const obsahClean = t.obsah.filter(o => o && typeof o === 'string' && !o.startsWith('**'));
+            if (obsahClean.length) lines.push(`### Obsah\n\n${obsahClean.map(o => `- ${o}`).join('\n')}\n`);
+        }
+        if (t.co_si_odnesou) lines.push(`### Co si odnesou\n\n${t.co_si_odnesou}\n`);
+        if (t.navrh_lektora) lines.push(`### Navrhovaný lektor\n\n${t.navrh_lektora}\n`);
+        lines.push('---\n');
+    }
+    const md = lines.join('');
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `katalog_temat_SP_${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast(`Staženo ${topics.length} témat`);
+}
+
 function openKatalogDetail(index) {
     const filtered = spKatalog.filter(t => t.modul === 'Chat' || t.modul === 'Build');
     const filter = document.querySelector('.filter-btn[data-katalog-filter].active')?.dataset?.katalogFilter || 'all';

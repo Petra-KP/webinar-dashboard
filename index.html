@@ -67,9 +67,12 @@
             </section>
 
             <section id="tab-katalog" class="tab-content active">
-                <div class="section-header">
-                    <h2>Katalog témat ze Superpower metodiky</h2>
-                    <p class="section-desc">Témata podle superschopností. Klikni „Schválit“ pro přidání do Moje návrhy.</p>
+                <div class="section-header" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+                    <div>
+                        <h2>Katalog témat ze Superpower metodiky</h2>
+                        <p class="section-desc">Témata podle superschopností. Klikni „Schválit“ pro přidání do Moje návrhy.</p>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="downloadTopicsAsMd()">📥 Stáhnout témata (MD)</button>
                 </div>
                 <div class="filters">
                     <button class="filter-btn active" data-katalog-filter="all">Všechna</button>
