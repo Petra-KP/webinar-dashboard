@@ -1,0 +1,12 @@
+/**
+ * Příklad konfigurace pro JSONBin.io (sdílené hlasy).
+ * Zkopíruj tento soubor jako config.js a vyplň hodnoty.
+ *
+ * 1. Vytvoř účet na https://jsonbin.io/
+ * 2. Create Bin – vlož: {"preferences":[]} – zkopíruj Bin ID
+ * 3. Account → API Keys – vytvoř klíč
+ */
+window.JSONBIN_CONFIG = {
+  binId: 'TVŮJ_BIN_ID',
+  apiKey: 'TVŮJ_API_KEY'
+};

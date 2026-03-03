@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webinar Agent Dashboard | Aibility</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">Webinar Agent</h1>
+                <span class="subtitle">Ekosystém návrhů webinářů</span>
+            </div>
+            <div class="header-right">
+                <span id="airtable-status" class="status-badge status-disconnected">
+                    ⚪ Airtable
+                </span>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="katalog">
+                📚 Katalog SP
+            </button>
+            <button class="tab" data-tab="drafts">
+                📝 Moje návrhy
+                <span class="tab-count" id="drafts-count">0</span>
+            </button>
+            <button class="tab" data-tab="approved">
+                ✅ Schválené
+                <span class="tab-count" id="approved-count">0</span>
+            </button>
+            <button class="tab" data-tab="archiv">
+                📦 Archiv
+                <span class="tab-count" id="archiv-count">0</span>
+            </button>
+            <button class="tab" data-tab="slots">
+                📅 Sloty
+            </button>
+        </nav>
+
+        <main class="content">
+            <section id="tab-drafts" class="tab-content">
+                <div class="section-header" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+                    <div>
+                        <h2>Moje návrhy</h2>
+                        <p class="section-desc">Témata z Katalogu SP nebo vlastní. Přidej téma tlačítkem níže nebo „Použít“ v katalogu. Klikni na kartu pro detail.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="openAddTopicModal()">➕ Přidat vlastní téma</button>
+                </div>
+                
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">Všechny</button>
+                    <button class="filter-btn" data-filter="Chat">💬 Chat</button>
+                    <button class="filter-btn" data-filter="Build">🛠️ Build</button>
+                </div>
+                
+                <div id="drafts-list" class="cards-grid"></div>
+                
+                <div id="drafts-empty" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📭</div>
+                    <h3>Žádné návrhy</h3>
+                    <p id="drafts-empty-msg">Přejdi do Katalogu SP a klikni „Použít“ u tématu, které chceš naplánovat.</p>
+                </div>
+            </section>
+
+            <section id="tab-katalog" class="tab-content active">
+                <div class="section-header" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+                    <div>
+                        <h2>Katalog témat ze Superpower metodiky</h2>
+                        <p class="section-desc">Témata podle superschopností. Ty klikneš „Schválit“ pro přidání do Moje návrhy. Kolegové hlasují přímo na kartě – Chci nebo Nechci (jméno + volitelná poznámka).</p>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="clearAllVotes()" title="Smazat všechny hlasy u všech témat">🗑️ Smazat všechny hlasy</button>
+                </div>
+                <div class="filters">
+                    <button class="filter-btn active" data-katalog-filter="all">Všechna</button>
+                    <button class="filter-btn" data-katalog-filter="Chat">💬 Chat</button>
+                    <button class="filter-btn" data-katalog-filter="Build">🛠️ Build</button>
+                </div>
+                <div id="katalog-list" class="cards-grid"></div>
+                <div id="katalog-empty" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📚</div>
+                    <h3>Katalog se načítá</h3>
+                    <p>Načítám témata z dokumentu SP metodiky...</p>
+                </div>
+            </section>
+
+            <section id="tab-approved" class="tab-content">
+                <div class="section-header">
+                    <h2>Schválené webináře</h2>
+                    <p class="section-desc">Schválené návrhy s vygenerovanými texty, připravené k uložení do Airtable</p>
+                </div>
+                
+                <div id="approved-list" class="cards-grid"></div>
+                
+                <div id="approved-empty" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📋</div>
+                    <h3>Žádné schválené</h3>
+                    <p>Schval některý návrh z Moje návrhy</p>
+                </div>
+            </section>
+
+            <section id="tab-archiv" class="tab-content">
+                <div class="section-header">
+                    <h2>Archiv – už proběhlo / vyhodnoceno / nevyužijeme</h2>
+                    <p class="section-desc">Návrhy, které už proběhly, byly vyhodnoceny nebo se nevyužijí. Zůstávají zde pro přehled.</p>
+                </div>
+                <div class="filters">
+                    <button class="filter-btn active" data-archiv-filter="all">Všechny</button>
+                    <button class="filter-btn" data-archiv-filter="ulozeno_do_airtable">📤 Uloženo do Airtable</button>
+                    <button class="filter-btn" data-archiv-filter="proběhlo">✅ Už proběhlo</button>
+                    <button class="filter-btn" data-archiv-filter="zamitnuto">🚫 Zamítnuto</button>
+                    <button class="filter-btn" data-archiv-filter="nevyužijeme">❌ Nevyužijeme</button>
+                </div>
+                <div id="archiv-list" class="cards-grid"></div>
+                <div id="archiv-empty" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📦</div>
+                    <h3>Archiv je prázdný</h3>
+                    <p>Přesuň sem návrhy, které už proběhly nebo se nevyužijí – v detailu klikni na „Přesunout do archivu“.</p>
+                </div>
+            </section>
+
+            <section id="tab-slots" class="tab-content">
+                <div class="section-header">
+                    <h2>Kalendář slotů</h2>
+                    <p class="section-desc">Úterý 11:00 — střídání Chat / Build</p>
+                </div>
+                <div id="slots-list" class="slots-grid"></div>
+            </section>
+        </main>
+
+        <!-- Detail modal -->
+        <div id="draft-modal" class="modal" style="display: none;">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-wide">
+                <div class="modal-header">
+                    <h2 id="modal-title">Detail návrhu</h2>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body" id="modal-body"></div>
+                <div class="modal-footer" id="modal-footer"></div>
+            </div>
+        </div>
+
+        <div id="toast" class="toast" style="display: none;">
+            <span id="toast-message"></span>
+        </div>
+
+        <!-- Modal: Přidat vlastní téma -->
+        <div id="add-topic-modal" class="modal" style="display: none;">
+            <div class="modal-backdrop" onclick="closeAddTopicModal()"></div>
+            <div class="modal-content modal-wide" style="max-width:640px">
+                <div class="modal-header">
+                    <h2>Přidat vlastní téma webináře</h2>
+                    <button class="modal-close" onclick="closeAddTopicModal()">&times;</button>
+                </div>
+                <div class="modal-body" id="add-topic-body">
+                    <form id="add-topic-form" onsubmit="return false;">
+                        <div class="form-group">
+                            <label for="add-tema">Název tématu *</label>
+                            <input type="text" id="add-tema" required placeholder="např. Jak psát efektivní prompty" />
+                        </div>
+                        <div class="form-group">
+                            <label for="add-modul">Modul *</label>
+                            <select id="add-modul" required>
+                                <option value="Chat">💬 Chat</option>
+                                <option value="Build">🛠️ Build</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-problem">O čem má webinář být</label>
+                            <textarea id="add-problem" rows="3" placeholder="Jaký problém řeší? Pro koho je určen?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-usp">Proč právě tento webinář</label>
+                            <textarea id="add-usp" rows="2" placeholder="Proč je téma důležité? Co je unikátní?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-reseni">Řešení / co webinář nabízí</label>
+                            <textarea id="add-reseni" rows="4" placeholder="Co webinář nabízí? Jak řeší problém?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-obsah">Struktura a obsah (každý bod na nový řádek)</label>
+                            <textarea id="add-obsah" rows="8" placeholder="1. Úvod&#10;2. Teorie&#10;3. Praktická část&#10;4. Závěr"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-odnesou">Co se lidé mají dozvědět</label>
+                            <textarea id="add-odnesou" rows="4" placeholder="Co si účastníci odnesou?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Vyber lektora</label>
+                            <div id="add-lektor-checkboxes" style="display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--gray-300);border-radius:8px;background:var(--gray-50)">
+                                <!-- Naplní app.js při otevření modalu -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeAddTopicModal()">Zrušit</button>
+                    <button class="btn btn-primary" onclick="submitAddTopic()">Přidat návrh</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vote modal – jméno + poznámka před odesláním hlasu -->
+        <div id="vote-modal" class="modal" style="display: none;">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="vote-modal-title">Váš hlas</h2>
+                    <button class="modal-close" onclick="closeVoteModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="vote-modal-topic" class="vote-modal-topic" style="margin-bottom:16px;font-weight:500;color:var(--gray-700)"></p>
+                    <p id="vote-modal-preference" class="vote-modal-preference" style="margin-bottom:16px;padding:8px 12px;border-radius:8px;font-size:0.9rem"></p>
+                    <div class="field-group" style="margin-bottom:16px">
+                        <label for="vote-name">Vaše jméno <span style="color:var(--aibility-primary)">*</span></label>
+                        <input type="text" id="vote-name" placeholder="např. Jana Nováková" maxlength="80" required>
+                    </div>
+                    <div class="field-group">
+                        <label for="vote-note">Poznámka (volitelně)</label>
+                        <textarea id="vote-note" rows="3" placeholder="Např. zajímá mě hlavně část o automatizaci..." maxlength="500"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeVoteModal()">Zrušit</button>
+                    <button class="btn btn-primary" id="vote-submit-btn">Odeslat hlas</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="embedded_data.js"></script>
+    <script src="text_generator.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+[
+  {
+    "tema": "Struktura požadavku: role, kontext, formát (Super Creation)",
+    "modul": "Chat",
+    "problem": "AI vrací obecné nebo špatné odpovědi. Lidé nevědí, co přidat a jak požadavek strukturovat – bez ohledu na to, který nástroj používají.",
+    "reseni": "Zaměříme se na tři pilíře – kdo má AI být, co má vědět a jak má odpovědět. Univerzální recept, který funguje v jakémkoli chatu s AI.",
+    "superschopnosti": [
+      "Umění promptů",
+      "Rychlé tvoření (AI dělá 90 %",
+      "ty 10 %)"
+    ],
+    "obsah": [
+      "Role – proč říct AI, v jaké roli má odpovídat",
+      "Kontext – co přidat, aby měla dost informací",
+      "Formát – jak chceme odpověď (odrážky, tabulka, tón)",
+      "Příklady na talíři – kdy dát AI ukázku toho, co chcete",
+      "Iterace – jak vylepšit výstup, když to napoprvé nesedí"
+    ],
+    "co_si_odnesou": "Šablony pro tři typy úkolů (shrnout, napsat, analyzovat). Jasno v tom, co v promptu nesmí chybět.",
+    "navrh_lektora": "Tom Paulus (Aibility) + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-chat-1"
+  },
+  {
+    "tema": "Kalibrace důvěry: kdy AI stačí a kdy raději zkontrolovat (Super Intelligence)",
+    "modul": "Chat",
+    "problem": "Lidé buď AI slepě věří, nebo ji naopak vůbec nepoužívají. Neví, kdy výstup zkontrolovat a kdy stačí.",
+    "reseni": "Naučíme vás „kalibrovat“ důvěru – podle typu úkolu vědět, zda stačí rychlý pohled, nebo je potřeba hloubková revize.",
+    "superschopnosti": [
+      "Rozumná důvěra (kdy AI věřit",
+      "kdy ověřit)"
+    ],
+    "obsah": [
+      "Typy úkolů a míra rizika – fakta vs. kreativní text vs. čísla",
+      "Rychlá kontrola – na co se podívat během 30 vteřin",
+      "Kdy nestačí kontrola a je potřeba ověřit zdroje",
+      "Co do AI nedávat – citlivá data a firemní tajemství",
+      "Praktické checklisty pro běžné situace"
+    ],
+    "co_si_odnesou": "Jednoduchá pravidla pro různé typy úkolů. Klid při práci s AI.",
+    "navrh_lektora": "Petra Kovandová + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-chat-2"
+  },
+  {
+    "tema": "Znalosti na míru: jak je uložit a znovu použít (Super Knowledge)",
+    "modul": "Chat",
+    "problem": "Každý rozhovor začíná od nuly. AI neví, jak píšete, co děláte, jaký styl potřebujete. Opakujete stejné instrukce znovu a znovu.",
+    "reseni": "Zaměříme se na to, **jak získat Super Knowledge** – jak organizovat znalosti tak, aby je AI mohla znovu použít. Instrukce, dokumenty, šablony – co uložit a jak to udržovat aktuální.",
+    "superschopnosti": [
+      "Ukládání a znovupoužití znalostí",
+      "Umění promptů"
+    ],
+    "obsah": [
+      "Proč mít znalosti uložené – místo opakování v každém chatu",
+      "Instrukce na míru – jak popsat svůj styl a pravidla",
+      "Kdy přidat dokumenty a kdy stačí text",
+      "Jak znalosti udržovat aktuální",
+      "Praktické cvičení: sestavení vlastní sady instrukcí"
+    ],
+    "co_si_odnesou": "Vlastní sadu instrukcí pro svůj kontext. Návod na údržbu a vylepšování.",
+    "navrh_lektora": "Tom Paulus (Aibility) nebo Honza Hubka + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-chat-3"
+  },
+  {
+    "tema": "Tři vzorce pro práci s textem: shrnutí, přepis, úprava (Super Creation)",
+    "modul": "Chat",
+    "problem": "Shrnutí, přepisy, úpravy textů – to vše jde s AI rychleji, ale lidé nevědí, jak na to systematicky. Každý úkol řeší ad hoc.",
+    "reseni": "Ukážeme **tři opakovatelné vzorce** – shrnutí na míru, přepis a úprava stylu, odpověď z kontextu. Postup: zdroj → dotaz → výsledek. Bez závislosti na konkrétním nástroji.",
+    "superschopnosti": [
+      "Rychlé tvoření (AI dělá 90 %",
+      "ty 10 %)",
+      "Umění promptů"
+    ],
+    "obsah": [
+      "Shrnutí na míru – ne obecné, ale podle toho, co potřebujete",
+      "Přepis a úprava stylu – od hovorového k formálnímu",
+      "Odpověď z kontextu – práce s přílohou nebo předchozí korespondencí",
+      "Jak se ptát, aby AI našla to pravé",
+      "Limity – kdy AI u textů selhává a proč"
+    ],
+    "co_si_odnesou": "Tři vzorce pro typické situace. Šablony dotazů k okamžitému použití.",
+    "navrh_lektora": "Tom Paulus (Aibility) nebo Honza Hubka + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-chat-4"
+  },
+  {
+    "tema": "Mapa příležitostí: kde ve vaší práci AI pomůže",
+    "modul": "Chat",
+    "problem": "Lidé nevědí, kde by AI mohla pomoct. Zkouší ji jen na pár věcech a zbytek dělají po staru.",
+    "reseni": "Provedeme vás cvičením – projdete svůj pracovní den a vytvoříte si mapu míst, kde AI dává smysl. Ne teorie, ale konkrétní výstup pro vás.",
+    "superschopnosti": [
+      "Vidět příležitosti (kde AI pomůže)"
+    ],
+    "obsah": [
+      "Jak projít den a identifikovat opakující se úkoly",
+      "Typické situace: plánování, psaní, analýza, učení – příklady z praxe",
+      "Je to správná otázka? – přemýšlení o problému před řešením",
+      "Praktické cvičení: každý si vytvoří svou mapu příležitostí",
+      "Od mapy k akci – jak vybrat první tři věci k vyzkoušení"
+    ],
+    "co_si_odnesou": "Vlastní mapu příležitostí. Plán prvních tří kroků s AI.",
+    "navrh_lektora": "Martin Imrich (Aibility) nebo Petra Kovandová + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-chat-5"
+  },
+  {
+    "tema": "Korporátní AI: co máte, co jde a jak to prosadit",
+    "modul": "Chat",
+    "problem": "Velká část ukázek AI je pro „volné“ prostředí. V korporátu jsou limity – licence, bezpečnost, schvalování. Lidé nevědí, co tam reálně jde.",
+    "reseni": "Zaměříme se na realitu korporátu – co typicky máte (Copilot, firemní nástroje), co s tím jde dělat a jak AI prosadit u vedení a kolegů.",
+    "superschopnosti": [
+      "Vidět příležitosti",
+      "Propojování nástrojů a systémů"
+    ],
+    "obsah": [
+      "Korporát vs. volný trh – co je jinak a proč",
+      "Co typicky máte: Copilot, firemní ChatGPT, omezení",
+      "Bezpečnost – co do AI nedávat a proč",
+      "Jak mluvit s vedením – argumenty a příklady ROI",
+      "Tipy na prosazení AI v týmu – od pilotu k rozšíření"
+    ],
+    "co_si_odnesou": "Přehled toho, co v korporátu reálně jde. Argumenty a příklady pro vedení.",
+    "navrh_lektora": "Martin Imrich (Aibility) nebo Jakub Danielka (Copilot) + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-chat-6"
+  },
+  {
+    "tema": "Popište problém, AI navrhne řešení: první nástroj bez kódu",
+    "modul": "Build",
+    "problem": "Mám nápad na nástroj nebo skript, ale neumím programovat. Nevíte, jak začít.",
+    "reseni": "Zaměříme se na to, jak popsat problém tak, aby AI navrhla správné řešení. Nemusíte psát kód – stačí říct, co potřebujete, a iterovat.",
+    "superschopnosti": [
+      "Rychlé tvoření",
+      "Propojování nástrojů a systémů"
+    ],
+    "obsah": [
+      "Jak formulovat problém, aby AI rozuměla",
+      "Od popisu k prvnímu výstupu – krok za krokem",
+      "Jednoduché nástroje: skript na zpracování dat, automatizace úkolu",
+      "Kde AI pomůže a kde raději jinak",
+      "Praktická ukázka: od „potřebuji X“ k funkční věci"
+    ],
+    "co_si_odnesou": "První funkční nástroj nebo skript. Mentální model pro další projekty.",
+    "navrh_lektora": "Tom Paulus (Aibility) nebo Ondřej Švec (Aibility) + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-build-7"
+  },
+  {
+    "tema": "Od nápadu k výstupu za hodiny: princip 90/10 (Super Creation)",
+    "modul": "Build",
+    "problem": "Nápad na aplikaci, dashboard nebo stránku leží v šuplíku. Klasický vývoj trvá týdny. Nevíte, jak začít – a jak využít AI tak, aby dělala většinu práce.",
+    "reseni": "Zaměříme se na **princip 90/10** – vy říkáte CO, AI dělá JAK. Jak iterovat od prvního draftu k použitelné verzi. Obecný postup bez vázání na konkrétní nástroj. Cíl: funkční prototyp za dopoledne.",
+    "superschopnosti": [
+      "Rychlé tvoření (AI dělá 90 %",
+      "ty 10 %)",
+      "Vidět příležitosti"
+    ],
+    "obsah": [
+      "Proč prototyp – a proč ne čekat na „hotové“ řešení",
+      "Vy říkáte CO, AI dělá JAK – jak to funguje v praxi",
+      "Iterace – od prvního draftu k použitelné verzi",
+      "Kdy prototyp stačí a kdy je čas na víc",
+      "Praktické cvičení: od popisu k prvnímu výstupu"
+    ],
+    "co_si_odnesou": "Mentální model pro rychlé tvoření. Odvahu zkoušet a iterovat.",
+    "navrh_lektora": "Martin Imrich (Aibility), Tom Paulus (Aibility) + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-build-8"
+  },
+  {
+    "tema": "Před automatizací: nejdřív zjednodušit, pak propojit",
+    "modul": "Build",
+    "problem": "Lidé chtějí automatizovat, ale nevědí, kde začít. Bez přemýšlení o procesu končí složitými a křehkými řešeními.",
+    "reseni": "Zaměříme se na fázi před stavěním – jak zjednodušit proces, rozložit ho na kroky a rozhodnout, kde má být člověk a kde AI. Teprve pak jde automatizace snadněji.",
+    "superschopnosti": [
+      "Propojování nástrojů a systémů",
+      "Vidět příležitosti"
+    ],
+    "obsah": [
+      "Proč nejdřív zjednodušit – typické chyby při skoku do automatizace",
+      "Jak rozložit proces na kroky, které dávají smysl",
+      "Kde má rozhodovat člověk a kde AI",
+      "Praktické cvičení: rozložení vašeho procesu na papír",
+      "Od rozložení k plánu – co automatizovat jako první"
+    ],
+    "co_si_odnesou": "Mentální model pro automatizaci. Plán prvního projektu.",
+    "navrh_lektora": "Ondřej Hanigovský + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-build-9"
+  },
+  {
+    "tema": "Kde přidat AI do automatizace: design workflow (Super Integration)",
+    "modul": "Build",
+    "problem": "Máte automatizaci (formulář → tabulka, e-mail → úkoly), ale nevíte, kde do ní zapojit AI. Nebo naopak – chcete automatizovat práci s AI a nevíte, jak na to.",
+    "reseni": "Zaměříme se na **design workflow** – kde má být člověk a kde AI. Jak rozložit proces na kroky a rozhodnout, kam AI přidat (shrnutí, klasifikace, odpověď). Obecné principy bez vázání na jeden nástroj.",
+    "superschopnosti": [
+      "Propojování nástrojů a systémů",
+      "Vidět příležitosti"
+    ],
+    "obsah": [
+      "Trigger → akce → výsledek – základní logika automatizace",
+      "Kde přidat AI krok – shrnutí, klasifikace, odpověď",
+      "Typické scénáře: formulář + AI + tabulka, e-mail + AI + notifikace",
+      "Jak fungují nástroje na automatizaci – přehled principů (bez konkrétního produktu)",
+      "Co dělat, když něco selže – základní troubleshooting"
+    ],
+    "co_si_odnesou": "Mentální model pro design workflow s AI. Plán první automatizace.",
+    "navrh_lektora": "Ondřej Hanigovský + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-build-10"
+  },
+  {
+    "tema": "Z prototypu na web: jak získat odkaz, který funguje (Super Creation + Super Integration)",
+    "modul": "Build",
+    "problem": "Máte prototyp na počítači, ale nikdo ho nevidí. Chcete odkaz, který pošlete kolegům nebo zákazníkům. Nevíte, jak na verzování a nasazení.",
+    "reseni": "Zaměříme se na **obecný princip** – cesta od kódu k URL. Jak verzovat, nasadit a sdílet. Bez závislosti na konkrétním editoru nebo nástroji. Jak dát AI kontext pro nasazení – co jí říct, aby pomohla.",
+    "superschopnosti": [
+      "Rychlé tvoření",
+      "Propojování nástrojů a systémů"
+    ],
+    "obsah": [
+      "Proč prototyp na počítači nestačí – a co s tím",
+      "Cesta od kódu k URL – verzování, nasazení (obecný princip)",
+      "Jak dát AI kontext pro nasazení – co jí říct",
+      "Praktická ukázka: jeden konkrétní postup (bez vázání na jeden nástroj)",
+      "Sdílení – odkaz, který funguje pro ostatní"
+    ],
+    "co_si_odnesou": "Vlastní URL nebo jasný plán, jak na to. Mentální model pro další projekty.",
+    "navrh_lektora": "Martin Imrich (Aibility), Tom Paulus (Aibility) + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-build-11"
+  },
+  {
+    "tema": "Zeptejte se na data v přirozeném jazyce: konverzační analýza (Super Creation + Super Intelligence)",
+    "modul": "Build",
+    "problem": "Máte data v tabulce, PDF nebo e-mailech. Potřebujete odpovědi – souhrny, trendy, srovnání. Ruční analýza trvá hodiny. Nevíte, jak se ptát, aby AI našla to pravé.",
+    "reseni": "Zaměříme se na **konverzační přístup** – nahrát, zeptat se v přirozeném jazyce, dostat odpověď. Bez složitých vzorců. Důraz na to, jak se ptát a kdy výsledek ověřit (Super Intelligence). *Odlišné od „Čistá data“ – tam šlo o přípravu dat; zde jde o dotazování a analýzu.*",
+    "superschopnosti": [
+      "Rychlé tvoření",
+      "Rozumná důvěra"
+    ],
+    "obsah": [
+      "Nahrání dat a dotaz – jak se ptát, aby AI našla to pravé",
+      "Z neuspořádaných dat k přehledu – tabulky, PDF, e-maily",
+      "Kdy AI u čísel chybuje – a jak to rychle ověřit",
+      "Praktické ukázky: reporting, srovnání, trendy",
+      "Od analýzy k vizualizaci – kdy chtít grafy a přehledy"
+    ],
+    "co_si_odnesou": "Postup pro konverzační práci s daty. Vědomí, kdy výsledek zkontrolovat.",
+    "navrh_lektora": "Tom Paulus (Aibility) nebo Mirek Černý + Petra Květová Pšeničná (moderátorka)",
+    "id": "sp-build-12"
+  }
+]
