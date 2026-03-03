@@ -432,8 +432,14 @@ async function loadSPKatalog() {
 async function checkAirtableStatus() {
     const el = document.getElementById('airtable-status');
     if (!useApi) {
-        el.className = 'status-badge status-disconnected';
-        el.innerHTML = '📂 Lokální režim';
+        const hasJsonBin = !!getJsonBinConfig();
+        if (hasJsonBin) {
+            el.className = 'status-badge status-connected';
+            el.innerHTML = '🟢 Hlasy sdílené';
+        } else {
+            el.className = 'status-badge status-disconnected';
+            el.innerHTML = '📂 Hlasy jen v prohlížeči';
+        }
         return;
     }
     try {
